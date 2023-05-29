@@ -33,42 +33,45 @@ try:
     print("MongoDB Connected successfully!")
 except:
     print("Could not connect to MongoDB")
+
+
 consumer = KafkaConsumer('test',bootstrap_servers=['my-kafka.bryanvre.svc.cluster.local:9092'])#'my-kafka-0.my-kafka-headless.kafka-adsoftsito.svc.cluster.local:9092'])
 # Parse received data from Kafka
 for msg in consumer:
     record = json.loads(msg.value)
     print(record)
-    name = record['name']
+    userId = record["userId"]
+    objectId = record["objectId"]
+    sms = record["sms"]
 
     # Create dictionary and ingest data into MongoDB
     try:
-       meme_rec = {'name':name }
-       print (meme_rec)
-       meme_id = db.memes_info.insert_one(meme_rec)
-       print("Data inserted with record ids", meme_id)
-    except:
-       print("Could not insert into MongoDB")
+        comment_rec = {
+            'userId': userId,
+            'objectId': objectId,
+            'sms': sms
+        }
+        print(comment_rec)
+        comment_id = db.memes_comments.insert_one(comment_rec)
+        print("Comment inserted with record ids", comment_id)
+    except Exception as e:
+        print("Could not insert into MongoDB:", e)
 
+    # Create bdnosql_sumary and insert groups into mongodb
     try:
-        agg_result = db.memes_info.aggregate(
-            [{
-                "$group" : 
-                { "_id" : "$name",
-                  "n" : {"$sum":1}}
-            }]
-        )
-        db.memes_summary.delete_many({})
+        agg_result = db.memes_comments.aggregate([
+            {
+                "$group": {
+                    "_id": "$objectId",
+                    "nSms": {"$sum": 1}
+                }
+            }
+        ])
+        db.memes_sumaryComments.delete_many({})
         for i in agg_result:
             print(i)
-            summary_id = db.memes_summary.insert_one(i)
-            print("Summary inserted with record ids", summary_id)
-       #meme_rec = {'name':name }
-       #print (meme_rec)
-       #meme_id = db.memes_info.insert_one(meme_rec)
-       #print("Data inserted with record ids", meme_id)
+            sumaryComments_id = db.memes_sumaryComments.insert_one(i)
+            print("Sumary Comments inserted with record ids: ", sumaryComments_id)
     except Exception as e:
-        print(f'group by caught {type(e)}: ')
+        print(f'group vy cought {type(e)}: ')
         print(e)
-       #print("Could not insert into MongoDB")
-
-
