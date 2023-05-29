@@ -37,19 +37,20 @@ except:
 
 consumer = KafkaConsumer('test',bootstrap_servers=['my-kafka.bryanvre.svc.cluster.local:9092'])#'my-kafka-0.my-kafka-headless.kafka-adsoftsito.svc.cluster.local:9092'])
 # Parse received data from Kafka
+
 for msg in consumer:
     record = json.loads(msg.value)
     print(record)
     userId = record["userId"]
     objectId = record["objectId"]
-    sms = record["sms"]
+    comment = record["comment"]
 
     # Create dictionary and ingest data into MongoDB
     try:
         comment_rec = {
             'userId': userId,
             'objectId': objectId,
-            'sms': sms
+            'comment': comment
         }
         print(comment_rec)
         comment_id = db.memes_comments.insert_one(comment_rec)
@@ -63,7 +64,7 @@ for msg in consumer:
             {
                 "$group": {
                     "_id": "$objectId",
-                    "nSms": {"$sum": 1}
+                    "nComments": {"$sum": 1}
                 }
             }
         ])
