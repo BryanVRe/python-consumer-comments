@@ -60,7 +60,7 @@ for msg in consumer:
 
     # Create bdnosql_sumary and insert groups into mongodb
    try:
-        agg_result = db.memes_comments.aggregate([
+    agg_result = db.memes_comments.aggregate([
               {
          "$group": {
                 "_id": {
