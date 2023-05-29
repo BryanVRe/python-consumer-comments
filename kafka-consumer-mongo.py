@@ -59,15 +59,12 @@ for msg in consumer:
         print("Could not insert into MongoDB:")
 
     # Create bdnosql_sumary and insert groups into mongodb
-    try:
+   try:
         agg_result = db.memes_comments.aggregate([
             {
                 "$group": {
-                    "_id": {
-                    "$objectId":"$objectId",
-                    "comment": "$comment"
-                    },
-                    "n":{"$sum":1}
+                    "_id": "$objectId",
+                    "nComments": {"$sum": 1}
                 }
             }
         ])
