@@ -61,13 +61,17 @@ for msg in consumer:
     # Create bdnosql_sumary and insert groups into mongodb
    try:
         agg_result = db.memes_comments.aggregate([
-            {
-                "$group": {
-                    "_id": "$objectId",
-                    "nComments": {"$sum": 1}
-                }
+              {
+         "$group": {
+                "_id": {
+                    "objectId": "$objectId",
+                    "comment": "$comment"
+                },
+                "n": {"$sum": 1}
             }
-        ])
+        }
+    ])
+
         db.memes_sumaryComments.delete_many({})
         for i in agg_result:
             print(i)
